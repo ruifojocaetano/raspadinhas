@@ -10,13 +10,13 @@
 <style>
 :root{
   --bg:#f4f1ea; --card:#ffffff; --ink:#1d2421; --muted:#68726d; --line:#dcd6c8;
-  --brand:#1f5f4a; --brand-ink:#ffffff; --accent:#d98e04; --warn:#b3261e; --ok:#1f7a4d; --field:#f8f6f0;
+  --brand:#1f5f4a; --brand-ink:#ffffff; --accent:#d98e04; --warn:#b3261e; --ok:#1f7a4d; --field:#f8f6f0; --campo:#ffffff; --campo-borda:#9aa39e;
   --p1:#2a7ab0; --p2:#7a4fb0; --p3:#b05a2a; --p5:#1f7a4d; --p10:#a02a5a; --p15:#444;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#141816; --card:#1e2421; --ink:#eceee9; --muted:#9aa5a0; --line:#323b37;
-    --brand:#3b9b79; --brand-ink:#08130f; --accent:#f0a820; --warn:#ff8a80; --ok:#5ed39b; --field:#171c19;
+    --brand:#3b9b79; --brand-ink:#08130f; --accent:#f0a820; --warn:#ff8a80; --ok:#5ed39b; --field:#171c19; --campo:#ffffff; --campo-borda:#9aa39e;
     --p1:#6db3e6; --p2:#b99be6; --p3:#e6a06d; --p5:#5ed39b; --p10:#e68ab3; --p15:#bbb;
   }
 }
@@ -44,7 +44,7 @@ main{padding:6px 16px}
 .cab,.linha{display:grid;grid-template-columns:minmax(0,1fr) 58px 58px 46px;gap:5px;align-items:center}
 .cab{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:6px 12px 2px}
 .cab span:not(:first-child){text-align:center}
-.linha{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 8px;margin:6px 0}
+.linha{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 8px;margin:6px 0}
 .linha.tem{border-color:var(--brand);box-shadow:inset 3px 0 0 var(--brand)}
 .nome{min-width:0}
 .nome b{font-size:1.06rem}
@@ -53,16 +53,30 @@ main{padding:6px 16px}
   color:#fff}
 .pv.p1{background:var(--p1)}.pv.p2{background:var(--p2)}.pv.p3{background:var(--p3)}.pv.p5{background:var(--p5)}
 .pv.p10{background:var(--p10)}.pv.p15{background:var(--p15)}
-.linha input{width:100%;min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--field);color:var(--ink);
+.linha input{width:100%;min-height:48px;border-radius:10px;border:2px solid var(--campo-borda);background:var(--campo);color:#000;
   font:inherit;font-size:1.1rem;text-align:center;padding:0 2px}
-.linha input:focus{outline:3px solid var(--accent);outline-offset:0;background:var(--card)}
+.linha input:focus{outline:3px solid var(--accent);outline-offset:0;background:#fff}
 .tot{text-align:center;font-weight:700;font-size:1.05rem}
 .tot small{display:block;font-weight:400;color:var(--muted);font-size:.6rem}
+.resumo{margin:14px 0 4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.resumo h2{font-size:.95rem;margin:0 0 6px}
+.resumo table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.resumo th{font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:500;text-align:right;padding:2px 0}
+.resumo th:first-child,.resumo td:first-child{text-align:left}
+.resumo td{text-align:right;padding:5px 0;border-top:1px solid var(--line)}
+.resumo tr.soma td{font-weight:750;border-top:2px solid var(--ink)}
 .vazio{color:var(--muted);text-align:center;padding:28px 0}
 .acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 16px 16px}
 .btn{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;padding:0 12px}
 .btn.principal{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
 .btn.perigo{color:var(--warn)}
+.btn.larga{grid-column:1/-1}
+dialog{max-height:88vh;overflow:auto}
+.g-item{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:6px 0}
+.g-item b{display:block}
+.g-item small{color:var(--muted);display:block;margin:2px 0 6px}
+.g-item .bt{display:flex;gap:6px}
+.g-item .btn{min-height:44px;flex:1;padding:0 6px}
 .rodape{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
   padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:center;z-index:6}
 .rodape .num{font-size:1.25rem;font-weight:750}
@@ -106,6 +120,7 @@ dialog .fim{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 <main>
   <div class="cab"><span>Jogo</span><span>Soltos</span><span>Blocos</span><span>Total</span></div>
   <div id="lista"></div>
+  <section class="resumo" id="resumo" aria-label="Resumo"></section>
 </main>
 
 <div class="acoes">
@@ -113,6 +128,7 @@ dialog .fim{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
   <button class="btn" id="b-copiar">Copiar final de ontem</button>
   <button class="btn principal" id="b-enviar">Enviar contagem</button>
   <button class="btn perigo" id="b-limpar">Limpar tudo</button>
+  <button class="btn larga" id="b-guardadas">Contagens guardadas e cópia de segurança</button>
 </div>
 
 <div class="rodape">
@@ -120,6 +136,18 @@ dialog .fim{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
   <div class="sub" id="r-jogos">0 jogos contados</div>
 </div>
 <div class="toast" id="toast" role="status"></div>
+
+<dialog id="d-guard">
+  <h2>Contagens guardadas</h2>
+  <div class="aviso" id="g-copia" style="padding:0 0 8px"></div>
+  <div id="g-lista"></div>
+  <div class="fim" style="flex-wrap:wrap;justify-content:stretch">
+    <button class="btn" id="g-backup" style="flex:1">Guardar cópia de segurança</button>
+    <button class="btn" id="g-restaurar" style="flex:1">Restaurar cópia</button>
+  </div>
+  <div class="fim"><button class="btn principal" id="g-fechar">Fechar</button></div>
+  <input type="file" id="g-ficheiro" accept=".json,application/json" hidden>
+</dialog>
 
 <dialog id="d-func">
   <h2>Novo nome de funcionária</h2>
@@ -195,7 +223,7 @@ $("f-ok").addEventListener("click", () => {
   estado.func = n; guardar("rasp:func", n); guardarEstado(); desenharFunc(n); $("d-func").close();
 });
 
-function guardarEstado(){ guardar(chave(estado.loja, estado.data, estado.tipo), estado); guardar("rasp:ultimo", {loja:estado.loja, tipo:estado.tipo}); }
+function guardarEstado(){ guardar(chave(estado.loja, estado.data, estado.tipo), estado); guardar("rasp:ultimo", {loja:estado.loja, data:estado.data, tipo:estado.tipo}); }
 
 function abrir(loja, data, tipo){
   estado = ler(chave(loja, data, tipo), null) || {loja, data, tipo, linhas:{}, extras:[]};
@@ -244,6 +272,12 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 function totais(){
   let bil = 0, eur = 0, jg = 0;
   for (const j of listaCompleta()){ const t = totalLinha(j); if (t){ bil += t; eur += t * j.preco; jg++; } }
+  const pp = {};
+  for (const j of listaCompleta()){ const t = totalLinha(j); if (t){ const o = pp[j.preco] = pp[j.preco] || {b:0}; o.b += t; } }
+  const f = n => n.toLocaleString("pt-PT");
+  $("resumo").innerHTML = "<h2>Resumo da contagem</h2><table><tr><th>Valor</th><th>Bilhetes</th><th>Euros</th></tr>" +
+    Object.keys(pp).map(Number).sort((a,b) => a-b).map(p => `<tr><td>${p} €</td><td>${f(pp[p].b)}</td><td>${f(pp[p].b*p)} €</td></tr>`).join("") +
+    `<tr class="soma"><td>Total</td><td>${f(bil)}</td><td>${f(eur)} €</td></tr></table>`;
   $("r-total").textContent = bil.toLocaleString("pt-PT") + " bilhetes";
   $("r-valor").textContent = eur.toLocaleString("pt-PT") + " € em bilhetes";
   $("r-jogos").textContent = jg + (jg === 1 ? " jogo contado" : " jogos contados");
@@ -256,13 +290,36 @@ $("lista").addEventListener("input", e => {
   const l = estado.linhas[jogo] = estado.linhas[jogo] || {};
   l[inp.dataset.c] = inp.value.replace(/\D/g, "");
   if (inp.value !== l[inp.dataset.c]) inp.value = l[inp.dataset.c];
+  estado.enviado = false;
+  atualizarLinha(linha, jogo);
+});
+function atualizarLinha(linha, jogo){
   const j = listaCompleta().find(x => x.jogo === jogo);
   const t = totalLinha(j), maco = j.por_maco || POR_MACO[j.preco] || 0;
   linha.querySelector(".tot").innerHTML = `${t||""}<small>${maco ? "×"+maco : ""}</small>`;
   linha.classList.toggle("tem", !!t);
   guardarEstado(); totais();
+}
+$("lista").addEventListener("focusin", e => { if (e.target.matches("input")) { e.target.dataset.prev = e.target.value; setTimeout(() => e.target.select(), 0); } });
+
+// valor invulgar: ao sair do campo, pede confirmação (apanha gralhas de teclado); se disser que não, volta ao valor anterior
+$("lista").addEventListener("change", e => {
+  const inp = e.target.closest("input"); if (!inp) return;
+  const linha = inp.closest(".linha"), jogo = +linha.dataset.jogo, c = inp.dataset.c, v = num(inp.value);
+  const j = listaCompleta().find(x => x.jogo === jogo); if (!j || !v) return;
+  const maco = j.por_maco || POR_MACO[j.preco] || 0, msgs = [];
+  if (c === "ind" && maco && v >= 2 * maco) msgs.push(`${v} soltos é muito (um maço tem ${maco}).`);
+  if (c === "blo" && v > 30) msgs.push(`${v} blocos é muito.`);
+  if (estado.tipo === "final"){
+    const ini = ler(chave(estado.loja, estado.data, "inicial"), null), li = ini && ini.linhas[jogo];
+    if (li){ const ti = num(li.ind) + num(li.blo) * maco, tf = totalLinha(j);
+      if (tf > ti + 2 * maco) msgs.push(`O final (${tf}) é maior que o inicial (${ti}).`); }
+  }
+  if (!msgs.length || confirm(`${j.jogo} ${j.nome}\n${msgs.join("\n")}\nEstá certo?`)) return;
+  const antes = num(inp.dataset.prev) || "";
+  estado.linhas[jogo][c] = String(antes); inp.value = antes;
+  atualizarLinha(linha, jogo);
 });
-$("lista").addEventListener("focusin", e => { if (e.target.matches("input")) setTimeout(() => e.target.select(), 0); });
 
 function mudar(){
   const loja = +$("loja").value, data = $("data").value || hoje();
@@ -319,25 +376,119 @@ function csv(){
   }
   return "﻿" + L.join("\r\n") + "\r\n";
 }
-$("b-enviar").addEventListener("click", async () => {
+// segundo ficheiro: só os totais por valor de bilhete (e o total geral)
+function csvTotais(){
+  const pp = {}; let bil = 0, eur = 0;
+  for (const j of listaCompleta()){ const t = totalLinha(j); if (t){ pp[j.preco] = (pp[j.preco] || 0) + t; bil += t; eur += t * j.preco; } }
+  const L = ["Loja;Data;Tipo;Funcionaria;Valor;Bilhetes;Euros"], base = [estado.loja, estado.data, estado.tipo, estado.func || ""];
+  for (const p of Object.keys(pp).map(Number).sort((a,b) => a-b)) L.push([...base, p, pp[p], pp[p] * p].join(";"));
+  L.push([...base, "TOTAL", bil, eur].join(";"));
+  return "\ufeff" + L.join("\r\n") + "\r\n";
+}
+$("b-enviar").addEventListener("click", () => enviar());
+async function enviar(){
   if (!Object.values(estado.linhas).some(l => num(l.ind) || num(l.blo))) return toast("Ainda não há nada contado.");
   if (!estado.func) return toast("Escolhe primeiro a funcionária.");
-  const nome = `stocks ${LOJAS[estado.loja]} ${estado.tipo} ${estado.data.split("-").reverse().join("-")}.csv`;
-  const ficheiro = new File([csv()], nome, {type: "text/csv"});
+  const sufixo = `${LOJAS[estado.loja]} ${estado.tipo} ${estado.data.split("-").reverse().join("-")}.csv`;
+  const ficheiros = [
+    new File([csv()], "stocks " + sufixo, {type: "text/csv"}),
+    new File([csvTotais()], "totais " + sufixo, {type: "text/csv"})
+  ];
   try {
-    if (navigator.canShare && navigator.canShare({files:[ficheiro]})){
-      await navigator.share({files:[ficheiro], title: nome});
-      return toast("Enviado.");
+    if (navigator.canShare && navigator.canShare({files: ficheiros})){
+      await navigator.share({files: ficheiros, title: "Contagem " + sufixo});
+      estado.enviado = true; guardarEstado();
+      return toast("Enviado (2 ficheiros).");
     }
   } catch(e){ if (e && e.name === "AbortError") return; }
-  const a = document.createElement("a"); a.href = URL.createObjectURL(ficheiro); a.download = nome; a.click();
-  toast("Ficheiro guardado: " + nome);
+  for (const f of ficheiros){ const a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); }
+  estado.enviado = true; guardarEstado();
+  toast("2 ficheiros guardados: stocks e totais.");
+}
+
+// contagens guardadas no telemóvel: rever, reabrir, reenviar, apagar
+function contagensGuardadas(){
+  const L = [];
+  for (let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i), m = /^rasp:(\d):(\d{4}-\d{2}-\d{2}):(inicial|final)$/.exec(k || "");
+    const e = m && ler(k, null);
+    if (e) L.push({k, loja:+m[1], data:m[2], tipo:m[3], e});
+  }
+  return L.sort((a,b) => b.data.localeCompare(a.data) || a.loja - b.loja || a.tipo.localeCompare(b.tipo));
+}
+function resumoDe(e){
+  let bil = 0, jg = 0;
+  for (const [jogo, l] of Object.entries(e.linhas || {})){
+    const j = [...jogos, ...(e.extras || [])].find(x => x.jogo === +jogo), maco = j ? (j.por_maco || POR_MACO[j.preco] || 0) : 0;
+    const t = num(l.ind) + num(l.blo) * maco; if (t){ bil += t; jg++; }
+  }
+  return {bil, jg};
+}
+const dmy = d => d.split("-").reverse().join("-");
+function desenharGuardadas(){
+  const L = contagensGuardadas();
+  $("g-lista").innerHTML = L.length ? L.map(c => { const r = resumoDe(c.e);
+    return `<div class="g-item"><b>${dmy(c.data)} · ${LOJAS[c.loja]} · ${c.tipo === "final" ? "Final" : "Inicial"}</b>` +
+      `<small>${esc(c.e.func || "sem funcionária")} · ${r.jg} jogos · ${r.bil.toLocaleString("pt-PT")} bilhetes · ${c.e.enviado ? "enviada" : "por enviar"}</small>` +
+      `<div class="bt"><button class="btn" data-a="abrir" data-k="${esc(c.k)}">Abrir</button><button class="btn" data-a="enviar" data-k="${esc(c.k)}">Reenviar</button><button class="btn perigo" data-a="apagar" data-k="${esc(c.k)}">Apagar</button></div></div>`;
+  }).join("") : '<div class="vazio">Ainda não há contagens guardadas.</div>';
+  const b = ler("rasp:backup", 0), dias = b ? Math.floor((Date.now() - b) / 864e5) : null;
+  $("g-copia").textContent = b ? `Última cópia de segurança: ${dias === 0 ? "hoje" : "há " + dias + (dias === 1 ? " dia" : " dias")}.` : "Ainda não fez nenhuma cópia de segurança.";
+}
+$("b-guardadas").addEventListener("click", () => { desenharGuardadas(); $("d-guard").showModal(); });
+$("g-fechar").addEventListener("click", () => $("d-guard").close());
+$("g-lista").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const m = /^rasp:(\d):(\d{4}-\d{2}-\d{2}):(inicial|final)$/.exec(b.dataset.k || ""); if (!m) return;
+  if (b.dataset.a === "apagar"){
+    if (!confirm("Apagar esta contagem do telemóvel? Não dá para desfazer.")) return;
+    try { localStorage.removeItem(b.dataset.k); } catch(err){}
+    if (estado.loja === +m[1] && estado.data === m[2] && estado.tipo === m[3]) abrir(+m[1], m[2], m[3]);
+    return desenharGuardadas();
+  }
+  $("d-guard").close(); abrir(+m[1], m[2], m[3]);
+  if (b.dataset.a === "enviar") enviar(); else toast("Aberta a contagem de " + dmy(m[2]) + ".");
+});
+
+// cópia de segurança: um ficheiro .json com tudo o que está guardado (contagens, nomes, jogos acrescentados)
+const chavesApp = () => { const r = []; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (k && k.startsWith("rasp:") && k !== "rasp:jogos" && k !== "rasp:backup") r.push(k); } return r; };
+$("g-backup").addEventListener("click", async () => {
+  const dados = {}; chavesApp().forEach(k => dados[k] = ler(k, null));
+  const f = new File([JSON.stringify({app:"raspadinhas", versao:1, criado:new Date().toISOString(), dados})], `copia raspadinhas ${dmy(hoje())}.json`, {type:"application/json"});
+  try {
+    if (navigator.canShare && navigator.canShare({files:[f]})) await navigator.share({files:[f], title:f.name});
+    else { const a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); }
+  } catch(err){ if (err && err.name === "AbortError") return; }
+  guardar("rasp:backup", Date.now()); desenharGuardadas(); toast("Cópia de segurança feita.");
+});
+$("g-restaurar").addEventListener("click", () => $("g-ficheiro").click());
+$("g-ficheiro").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  let c; try { c = JSON.parse(await f.text()); } catch(err){}
+  if (!c || c.app !== "raspadinhas" || !c.dados) return toast("Esse ficheiro não é uma cópia desta app.");
+  const ks = Object.keys(c.dados).filter(k => k.startsWith("rasp:") && k !== "rasp:jogos" && k !== "rasp:backup");
+  if (!ks.length || !confirm(`Restaurar ${ks.length} itens da cópia de ${c.criado ? dmy(c.criado.slice(0,10)) : "?"}? Contagens com a mesma loja, data e tipo são substituídas.`)) return;
+  for (const k of ks){
+    if (k === "rasp:funcs") guardar(k, [...new Set([...ler(k, []), ...(c.dados[k] || [])])]);
+    else guardar(k, c.dados[k]);
+  }
+  location.reload();
 });
 
 (async function(){
   await carregarJogos();
   const u = ler("rasp:ultimo", {loja:3, tipo:"inicial"});
-  abrir(u.loja || 3, hoje(), u.tipo || "inicial");
+  let data = hoje(), retomada = false;
+  // retoma: se a última contagem aberta era de outro dia e ficou por enviar, volta a ela
+  if (u.data && u.data !== data){
+    const e = ler(chave(u.loja, u.data, u.tipo), null);
+    if (e && !e.enviado && Object.values(e.linhas || {}).some(l => num(l.ind) || num(l.blo))){ data = u.data; retomada = true; }
+  }
+  abrir(u.loja || 3, data, u.tipo || "inicial");
+  if (retomada) toast("Retomada a contagem de " + dmy(data) + " (ainda não enviada).");
+  const b = ler("rasp:backup", 0);
+  if (contagensGuardadas().length && (!b || Date.now() - b > 7 * 864e5)) $("aviso-lista").textContent += " · Falta cópia de segurança (botão no fim da página).";
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(err){}
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
 })();
 </script>
