@@ -30,6 +30,7 @@ header h1{font-size:1.05rem;margin:0 0 8px;font-weight:650}
 .controlos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .controlos select,.controlos input{width:100%;min-height:44px;border-radius:10px;border:0;padding:0 10px;font:inherit;
   background:rgba(255,255,255,.95);color:#1d2421}
+.controlos #func{grid-column:1/-1}
 .tipo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .tipo button{min-height:44px;border-radius:10px;border:2px solid rgba(255,255,255,.55);background:transparent;
   color:var(--brand-ink);font:inherit;font-weight:600}
@@ -40,23 +41,23 @@ header h1{font-size:1.05rem;margin:0 0 8px;font-weight:650}
 .chip{min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 12px;font:inherit}
 .chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
 main{padding:6px 16px}
-.cab,.linha{display:grid;grid-template-columns:minmax(0,1fr) 84px 84px 64px;gap:8px;align-items:center}
-.cab{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:6px 12px 2px}
+.cab,.linha{display:grid;grid-template-columns:minmax(0,1fr) 58px 58px 46px;gap:5px;align-items:center}
+.cab{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:6px 12px 2px}
 .cab span:not(:first-child){text-align:center}
-.linha{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0}
+.linha{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 8px;margin:6px 0}
 .linha.tem{border-color:var(--brand);box-shadow:inset 3px 0 0 var(--brand)}
 .nome{min-width:0}
 .nome b{font-size:1.06rem}
-.nome .n{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
-.nome .pv{display:inline-block;font-size:.72rem;font-weight:700;border-radius:6px;padding:1px 6px;margin-top:2px;
+.nome .n{color:var(--ink);overflow-wrap:anywhere}
+.nome .pv{display:table;font-size:.72rem;font-weight:700;border-radius:6px;padding:1px 6px;margin-top:2px;
   color:#fff}
 .pv.p1{background:var(--p1)}.pv.p2{background:var(--p2)}.pv.p3{background:var(--p3)}.pv.p5{background:var(--p5)}
 .pv.p10{background:var(--p10)}.pv.p15{background:var(--p15)}
 .linha input{width:100%;min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--field);color:var(--ink);
-  font:inherit;font-size:1.15rem;text-align:center;padding:0 4px}
+  font:inherit;font-size:1.1rem;text-align:center;padding:0 2px}
 .linha input:focus{outline:3px solid var(--accent);outline-offset:0;background:var(--card)}
-.tot{text-align:center;font-weight:700;font-size:1.1rem}
-.tot small{display:block;font-weight:400;color:var(--muted);font-size:.68rem}
+.tot{text-align:center;font-weight:700;font-size:1.05rem}
+.tot small{display:block;font-weight:400;color:var(--muted);font-size:.6rem}
 .vazio{color:var(--muted);text-align:center;padding:28px 0}
 .acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 16px 16px}
 .btn{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;padding:0 12px}
@@ -88,6 +89,7 @@ dialog .fim{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
       <option value="4">Loja 4 · Luanda</option>
     </select>
     <input id="data" type="date" aria-label="Data da contagem">
+    <select id="func" aria-label="Funcionária"></select>
   </div>
   <div class="tipo" role="group" aria-label="Tipo de contagem">
     <button id="t-inicial" aria-pressed="true">Inicial (manhã)</button>
@@ -119,6 +121,13 @@ dialog .fim{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 </div>
 <div class="toast" id="toast" role="status"></div>
 
+<dialog id="d-func">
+  <h2>Novo nome de funcionária</h2>
+  <label for="f-nome">Nome</label>
+  <input id="f-nome" maxlength="40" autocapitalize="characters">
+  <div class="fim"><button class="btn" id="f-cancel">Cancelar</button><button class="btn principal" id="f-ok">Guardar</button></div>
+</dialog>
+
 <dialog id="d-novo">
   <h2>Jogo que não está na lista</h2>
   <label for="n-jogo">Número do jogo (3 dígitos)</label>
@@ -137,6 +146,7 @@ const LOJAS = {1:"Raimundo", 2:"Mourao", 3:"Carlitos", 4:"Luanda"};
 let jogos = [];            // lista do site + jogos acrescentados à mão
 let estado = null;         // {loja, data, tipo, linhas:{jogo:{ind,blo}}, extras:[...]}
 
+const FUNC_BASE = ["KINDERLI SILVA","CARLA CLAUDIO","VERA LOURO","LURDES MARQUES","TANIA SENICA","DULCE SANTOS","MARTA LOPES","SOFIA FERREIRA","ELISABETE VAZ","SANDRA RODRIGUES","DENIS CAETANO"];
 const $ = id => document.getElementById(id);
 const hoje = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
 const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
@@ -166,6 +176,25 @@ function listaCompleta(){
   return [...jogos, ...extras].sort((a,b) => a.preco - b.preco || a.jogo - b.jogo);
 }
 
+// funcionária: lista fixa + nomes novos guardados no telemóvel
+const listaFunc = () => [...new Set([...FUNC_BASE, ...ler("rasp:funcs", [])])].sort((a,b) => a.localeCompare(b, "pt"));
+function desenharFunc(sel){
+  const s = $("func");
+  s.innerHTML = '<option value="">Funcionária…</option>' + listaFunc().map(n => `<option>${esc(n)}</option>`).join("") + '<option value="__novo__">+ Novo nome…</option>';
+  s.value = sel || "";
+}
+$("func").addEventListener("change", e => {
+  if (e.target.value === "__novo__"){ $("f-nome").value = ""; e.target.value = estado.func || ""; $("d-func").showModal(); return; }
+  estado.func = e.target.value; guardar("rasp:func", estado.func); guardarEstado();
+});
+$("f-cancel").addEventListener("click", () => $("d-func").close());
+$("f-ok").addEventListener("click", () => {
+  const n = $("f-nome").value.trim().replace(/\s+/g, " ").toUpperCase();
+  if (!n) return toast("Escreve o nome.");
+  guardar("rasp:funcs", [...new Set([...ler("rasp:funcs", []), n])]);
+  estado.func = n; guardar("rasp:func", n); guardarEstado(); desenharFunc(n); $("d-func").close();
+});
+
 function guardarEstado(){ guardar(chave(estado.loja, estado.data, estado.tipo), estado); guardar("rasp:ultimo", {loja:estado.loja, tipo:estado.tipo}); }
 
 function abrir(loja, data, tipo){
@@ -173,6 +202,8 @@ function abrir(loja, data, tipo){
   // jogos acrescentados à mão numa contagem ficam disponíveis nas seguintes da mesma loja
   const memo = ler("rasp:extras:" + loja, []);
   estado.extras = [...(estado.extras||[]), ...memo.filter(m => !(estado.extras||[]).some(e => e.jogo === m.jogo))];
+  if (!estado.func) estado.func = ler("rasp:func", "");
+  desenharFunc(estado.func);
   $("loja").value = loja; $("data").value = data;
   $("t-inicial").setAttribute("aria-pressed", tipo === "inicial");
   $("t-final").setAttribute("aria-pressed", tipo === "final");
@@ -202,7 +233,7 @@ function desenhar(){
       `<div class="nome"><b>${j.jogo}</b> <span class="n">${esc(j.nome)}</span><span class="pv p${j.preco}">${j.preco} €</span></div>` +
       `<input inputmode="numeric" pattern="[0-9]*" aria-label="Soltos ${j.jogo}" data-c="ind" value="${num(l.ind)||""}">` +
       `<input inputmode="numeric" pattern="[0-9]*" aria-label="Blocos ${j.jogo}" data-c="blo" value="${num(l.blo)||""}">` +
-      `<div class="tot">${totalLinha(j)||""}<small>${maco ? "bloco="+maco : ""}</small></div>`;
+      `<div class="tot">${totalLinha(j)||""}<small>${maco ? "×"+maco : ""}</small></div>`;
     box.appendChild(d);
   }
   if (!n) box.innerHTML = '<div class="vazio">Nenhum jogo para mostrar.</div>';
@@ -227,7 +258,7 @@ $("lista").addEventListener("input", e => {
   if (inp.value !== l[inp.dataset.c]) inp.value = l[inp.dataset.c];
   const j = listaCompleta().find(x => x.jogo === jogo);
   const t = totalLinha(j), maco = j.por_maco || POR_MACO[j.preco] || 0;
-  linha.querySelector(".tot").innerHTML = `${t||""}<small>${maco ? "bloco="+maco : ""}</small>`;
+  linha.querySelector(".tot").innerHTML = `${t||""}<small>${maco ? "×"+maco : ""}</small>`;
   linha.classList.toggle("tem", !!t);
   guardarEstado(); totais();
 });
@@ -280,16 +311,17 @@ $("n-ok").addEventListener("click", () => {
 
 // ficheiro enviado: um CSV por contagem, igual à folha do Excel (Jogo, Nome, Soltos, Blocos, Total)
 function csv(){
-  const L = ["Loja;Data;Tipo;Jogo;Nome;Preco;Indiv;Blocos;PorBloco;Total"];
+  const L = ["Loja;Data;Tipo;Jogo;Nome;Preco;Indiv;Blocos;PorBloco;Total;Funcionaria"];
   for (const j of listaCompleta()){
     const l = estado.linhas[j.jogo] || {}, ind = num(l.ind), blo = num(l.blo), maco = j.por_maco || POR_MACO[j.preco] || 0;
     if (!ind && !blo) continue;
-    L.push([estado.loja, estado.data, estado.tipo, j.jogo, j.nome.replace(/;/g, ","), j.preco, ind, blo, maco, ind + blo * maco].join(";"));
+    L.push([estado.loja, estado.data, estado.tipo, j.jogo, j.nome.replace(/;/g, ","), j.preco, ind, blo, maco, ind + blo * maco, estado.func || ""].join(";"));
   }
   return "﻿" + L.join("\r\n") + "\r\n";
 }
 $("b-enviar").addEventListener("click", async () => {
   if (!Object.values(estado.linhas).some(l => num(l.ind) || num(l.blo))) return toast("Ainda não há nada contado.");
+  if (!estado.func) return toast("Escolhe primeiro a funcionária.");
   const nome = `stocks ${LOJAS[estado.loja]} ${estado.tipo} ${estado.data.split("-").reverse().join("-")}.csv`;
   const ficheiro = new File([csv()], nome, {type: "text/csv"});
   try {
