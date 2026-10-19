@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contagem de raspadinhas</title>
+<meta name="theme-color" content="#1f5f4a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{
+  --bg:#f4f1ea; --card:#ffffff; --ink:#1d2421; --muted:#68726d; --line:#dcd6c8;
+  --brand:#1f5f4a; --brand-ink:#ffffff; --accent:#d98e04; --warn:#b3261e; --ok:#1f7a4d; --field:#f8f6f0;
+  --p1:#2a7ab0; --p2:#7a4fb0; --p3:#b05a2a; --p5:#1f7a4d; --p10:#a02a5a; --p15:#444;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141816; --card:#1e2421; --ink:#eceee9; --muted:#9aa5a0; --line:#323b37;
+    --brand:#3b9b79; --brand-ink:#08130f; --accent:#f0a820; --warn:#ff8a80; --ok:#5ed39b; --field:#171c19;
+    --p1:#6db3e6; --p2:#b99be6; --p3:#e6a06d; --p5:#5ed39b; --p10:#e68ab3; --p15:#bbb;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom));}
+header{position:sticky;top:0;z-index:5;background:var(--brand);color:var(--brand-ink);padding:10px 16px 12px;
+  padding-top:calc(10px + env(safe-area-inset-top))}
+header h1{font-size:1.05rem;margin:0 0 8px;font-weight:650}
+.controlos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.controlos select,.controlos input{width:100%;min-height:44px;border-radius:10px;border:0;padding:0 10px;font:inherit;
+  background:rgba(255,255,255,.95);color:#1d2421}
+.tipo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.tipo button{min-height:44px;border-radius:10px;border:2px solid rgba(255,255,255,.55);background:transparent;
+  color:var(--brand-ink);font:inherit;font-weight:600}
+.tipo button[aria-pressed="true"]{background:#fff;color:#1f5f4a;border-color:#fff}
+.barra{display:flex;gap:8px;padding:10px 16px 4px;align-items:center}
+.barra input[type=search]{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line);padding:0 12px;font:inherit;
+  background:var(--card);color:var(--ink)}
+.chip{min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 12px;font:inherit}
+.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+main{padding:6px 16px}
+.cab,.linha{display:grid;grid-template-columns:minmax(0,1fr) 84px 84px 64px;gap:8px;align-items:center}
+.cab{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:6px 12px 2px}
+.cab span:not(:first-child){text-align:center}
+.linha{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0}
+.linha.tem{border-color:var(--brand);box-shadow:inset 3px 0 0 var(--brand)}
+.nome{min-width:0}
+.nome b{font-size:1.06rem}
+.nome .n{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.nome .pv{display:inline-block;font-size:.72rem;font-weight:700;border-radius:6px;padding:1px 6px;margin-top:2px;
+  color:#fff}
+.pv.p1{background:var(--p1)}.pv.p2{background:var(--p2)}.pv.p3{background:var(--p3)}.pv.p5{background:var(--p5)}
+.pv.p10{background:var(--p10)}.pv.p15{background:var(--p15)}
+.linha input{width:100%;min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--field);color:var(--ink);
+  font:inherit;font-size:1.15rem;text-align:center;padding:0 4px}
+.linha input:focus{outline:3px solid var(--accent);outline-offset:0;background:var(--card)}
+.tot{text-align:center;font-weight:700;font-size:1.1rem}
+.tot small{display:block;font-weight:400;color:var(--muted);font-size:.68rem}
+.vazio{color:var(--muted);text-align:center;padding:28px 0}
+.acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 16px 16px}
+.btn{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;padding:0 12px}
+.btn.principal{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn.perigo{color:var(--warn)}
+.rodape{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:center;z-index:6}
+.rodape .num{font-size:1.25rem;font-weight:750}
+.rodape .sub{font-size:.8rem;color:var(--muted)}
+dialog{border:0;border-radius:16px;padding:18px;max-width:92vw;width:420px;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h2{margin:0 0 10px;font-size:1.1rem}
+dialog label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+dialog input,dialog select{width:100%;min-height:46px;border-radius:10px;border:1px solid var(--line);padding:0 10px;font:inherit;background:var(--field);color:var(--ink)}
+dialog .fim{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.aviso{font-size:.82rem;color:var(--muted);padding:0 16px 8px}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(92px + env(safe-area-inset-bottom));background:#1d2421;color:#fff;border-radius:12px;
+  padding:12px 14px;z-index:9;display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Contagem de raspadinhas</h1>
+  <div class="controlos">
+    <select id="loja" aria-label="Loja">
+      <option value="1">Loja 1 · Raimundo</option>
+      <option value="2">Loja 2 · Mourão</option>
+      <option value="3">Loja 3 · Carlitos</option>
+      <option value="4">Loja 4 · Luanda</option>
+    </select>
+    <input id="data" type="date" aria-label="Data da contagem">
+  </div>
+  <div class="tipo" role="group" aria-label="Tipo de contagem">
+    <button id="t-inicial" aria-pressed="true">Inicial (manhã)</button>
+    <button id="t-final" aria-pressed="false">Final (noite)</button>
+  </div>
+</header>
+
+<div class="barra">
+  <input id="pesq" type="search" placeholder="Procurar jogo ou nome" inputmode="search" aria-label="Procurar">
+  <button class="chip" id="so-tem" aria-pressed="false">Só contados</button>
+</div>
+<div class="aviso" id="aviso-lista"></div>
+
+<main>
+  <div class="cab"><span>Jogo</span><span>Soltos</span><span>Blocos</span><span>Total</span></div>
+  <div id="lista"></div>
+</main>
+
+<div class="acoes">
+  <button class="btn" id="b-novo">+ Jogo que não está na lista</button>
+  <button class="btn" id="b-copiar">Copiar final de ontem</button>
+  <button class="btn principal" id="b-enviar">Enviar contagem</button>
+  <button class="btn perigo" id="b-limpar">Limpar tudo</button>
+</div>
+
+<div class="rodape">
+  <div><div class="num" id="r-total">0 bilhetes</div><div class="sub" id="r-valor">0 €</div></div>
+  <div class="sub" id="r-jogos">0 jogos contados</div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<dialog id="d-novo">
+  <h2>Jogo que não está na lista</h2>
+  <label for="n-jogo">Número do jogo (3 dígitos)</label>
+  <input id="n-jogo" inputmode="numeric" pattern="[0-9]*" maxlength="5">
+  <label for="n-nome">Nome</label>
+  <input id="n-nome" maxlength="40">
+  <label for="n-preco">Preço do bilhete</label>
+  <select id="n-preco"><option>1</option><option>2</option><option>3</option><option>5</option><option>10</option><option>15</option><option>20</option></select>
+  <div class="fim"><button class="btn" id="n-cancel">Cancelar</button><button class="btn principal" id="n-ok">Guardar</button></div>
+</dialog>
+
+<script>
+"use strict";
+const POR_MACO = {1:100, 2:50, 3:35, 5:35, 10:20, 15:20, 20:20};
+const LOJAS = {1:"Raimundo", 2:"Mourao", 3:"Carlitos", 4:"Luanda"};
+let jogos = [];            // lista do site + jogos acrescentados à mão
+let estado = null;         // {loja, data, tipo, linhas:{jogo:{ind,blo}}, extras:[...]}
+
+const $ = id => document.getElementById(id);
+const hoje = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+const ler = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } };
+const chave = (loja, data, tipo) => `rasp:${loja}:${data}:${tipo}`;
+const num = v => { const n = parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : 0; };
+
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.style.display="block"; clearTimeout(toast.h); toast.h=setTimeout(()=>t.style.display="none",3500); }
+
+async function carregarJogos(){
+  let base = [];
+  try {
+    const r = await fetch("jogos.json?x=" + Date.now());
+    const j = await r.json();
+    base = j.jogos;
+    $("aviso-lista").textContent = "Lista de jogos de " + j.gerado;
+  } catch(e) {
+    base = ler("rasp:jogos", []);
+    $("aviso-lista").textContent = base.length ? "Sem ligação: lista guardada no telemóvel." : "Sem lista de jogos: usa «+ Jogo que não está na lista».";
+  }
+  if (base.length) guardar("rasp:jogos", base);
+  jogos = base;
+}
+
+function listaCompleta(){
+  const extras = (estado.extras || []).filter(e => !jogos.some(j => j.jogo === e.jogo));
+  return [...jogos, ...extras].sort((a,b) => a.preco - b.preco || a.jogo - b.jogo);
+}
+
+function guardarEstado(){ guardar(chave(estado.loja, estado.data, estado.tipo), estado); guardar("rasp:ultimo", {loja:estado.loja, tipo:estado.tipo}); }
+
+function abrir(loja, data, tipo){
+  estado = ler(chave(loja, data, tipo), null) || {loja, data, tipo, linhas:{}, extras:[]};
+  // jogos acrescentados à mão numa contagem ficam disponíveis nas seguintes da mesma loja
+  const memo = ler("rasp:extras:" + loja, []);
+  estado.extras = [...(estado.extras||[]), ...memo.filter(m => !(estado.extras||[]).some(e => e.jogo === m.jogo))];
+  $("loja").value = loja; $("data").value = data;
+  $("t-inicial").setAttribute("aria-pressed", tipo === "inicial");
+  $("t-final").setAttribute("aria-pressed", tipo === "final");
+  desenhar();
+}
+
+function totalLinha(j){
+  const l = estado.linhas[j.jogo] || {};
+  return num(l.ind) + num(l.blo) * (j.por_maco || POR_MACO[j.preco] || 0);
+}
+
+function desenhar(){
+  const q = $("pesq").value.trim().toLowerCase();
+  const soTem = $("so-tem").getAttribute("aria-pressed") === "true";
+  const box = $("lista"); box.innerHTML = "";
+  let n = 0;
+  for (const j of listaCompleta()){
+    const l = estado.linhas[j.jogo] || {};
+    const tem = num(l.ind) || num(l.blo);
+    if (soTem && !tem) continue;
+    if (q && !(String(j.jogo).includes(q) || j.nome.toLowerCase().includes(q))) continue;
+    n++;
+    const maco = j.por_maco || POR_MACO[j.preco] || 0;
+    const d = document.createElement("div");
+    d.className = "linha" + (tem ? " tem" : ""); d.dataset.jogo = j.jogo;
+    d.innerHTML =
+      `<div class="nome"><b>${j.jogo}</b> <span class="n">${esc(j.nome)}</span><span class="pv p${j.preco}">${j.preco} €</span></div>` +
+      `<input inputmode="numeric" pattern="[0-9]*" aria-label="Soltos ${j.jogo}" data-c="ind" value="${num(l.ind)||""}">` +
+      `<input inputmode="numeric" pattern="[0-9]*" aria-label="Blocos ${j.jogo}" data-c="blo" value="${num(l.blo)||""}">` +
+      `<div class="tot">${totalLinha(j)||""}<small>${maco ? "bloco="+maco : ""}</small></div>`;
+    box.appendChild(d);
+  }
+  if (!n) box.innerHTML = '<div class="vazio">Nenhum jogo para mostrar.</div>';
+  totais();
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function totais(){
+  let bil = 0, eur = 0, jg = 0;
+  for (const j of listaCompleta()){ const t = totalLinha(j); if (t){ bil += t; eur += t * j.preco; jg++; } }
+  $("r-total").textContent = bil.toLocaleString("pt-PT") + " bilhetes";
+  $("r-valor").textContent = eur.toLocaleString("pt-PT") + " € em bilhetes";
+  $("r-jogos").textContent = jg + (jg === 1 ? " jogo contado" : " jogos contados");
+}
+
+// escrever numa linha: atualiza só essa linha (não recria a lista, para o teclado não fechar)
+$("lista").addEventListener("input", e => {
+  const inp = e.target.closest("input"); if (!inp) return;
+  const linha = inp.closest(".linha"), jogo = +linha.dataset.jogo;
+  const l = estado.linhas[jogo] = estado.linhas[jogo] || {};
+  l[inp.dataset.c] = inp.value.replace(/\D/g, "");
+  if (inp.value !== l[inp.dataset.c]) inp.value = l[inp.dataset.c];
+  const j = listaCompleta().find(x => x.jogo === jogo);
+  const t = totalLinha(j), maco = j.por_maco || POR_MACO[j.preco] || 0;
+  linha.querySelector(".tot").innerHTML = `${t||""}<small>${maco ? "bloco="+maco : ""}</small>`;
+  linha.classList.toggle("tem", !!t);
+  guardarEstado(); totais();
+});
+$("lista").addEventListener("focusin", e => { if (e.target.matches("input")) setTimeout(() => e.target.select(), 0); });
+
+function mudar(){
+  const loja = +$("loja").value, data = $("data").value || hoje();
+  const tipo = $("t-final").getAttribute("aria-pressed") === "true" ? "final" : "inicial";
+  abrir(loja, data, tipo);
+}
+$("loja").addEventListener("change", mudar);
+$("data").addEventListener("change", mudar);
+$("t-inicial").addEventListener("click", () => { $("t-inicial").setAttribute("aria-pressed", true); $("t-final").setAttribute("aria-pressed", false); mudar(); });
+$("t-final").addEventListener("click", () => { $("t-final").setAttribute("aria-pressed", false); $("t-final").setAttribute("aria-pressed", true); $("t-inicial").setAttribute("aria-pressed", false); mudar(); });
+$("pesq").addEventListener("input", desenhar);
+$("so-tem").addEventListener("click", e => { const b = e.currentTarget; b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); desenhar(); });
+
+// «Copiar final de ontem»: a contagem inicial parte do último final guardado desta loja (data anterior)
+$("b-copiar").addEventListener("click", () => {
+  if (estado.tipo !== "inicial") return toast("Só na contagem inicial.");
+  let melhor = null;
+  for (let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i), m = /^rasp:(\d):(\d{4}-\d{2}-\d{2}):final$/.exec(k || "");
+    if (m && +m[1] === estado.loja && m[2] < estado.data && (!melhor || m[2] > melhor)) melhor = m[2];
+  }
+  if (!melhor) return toast("Não há contagem final anterior guardada neste telemóvel.");
+  if (Object.keys(estado.linhas).length && !confirm("Substituir o que já está preenchido?")) return;
+  const f = ler(chave(estado.loja, melhor, "final"), null);
+  estado.linhas = JSON.parse(JSON.stringify(f.linhas));
+  guardarEstado(); desenhar(); toast("Copiado do final de " + melhor.split("-").reverse().join("-") + ".");
+});
+
+$("b-limpar").addEventListener("click", () => {
+  if (!confirm("Apagar tudo o que está contado nesta contagem?")) return;
+  estado.linhas = {}; guardarEstado(); desenhar();
+});
+
+// jogo novo (ex.: um jogo que chegou e ainda não está no site)
+$("b-novo").addEventListener("click", () => { $("n-jogo").value = ""; $("n-nome").value = ""; $("d-novo").showModal(); });
+$("n-cancel").addEventListener("click", () => $("d-novo").close());
+$("n-ok").addEventListener("click", () => {
+  const jogo = num($("n-jogo").value), nome = $("n-nome").value.trim(), preco = +$("n-preco").value;
+  if (!jogo || !nome) return toast("Preenche o número e o nome.");
+  if (listaCompleta().some(j => j.jogo === jogo)) { $("d-novo").close(); $("pesq").value = String(jogo); desenhar(); return toast("Esse jogo já existe: está filtrado na lista."); }
+  const novo = {jogo, nome, preco, por_maco: POR_MACO[preco] || 0};
+  estado.extras.push(novo);
+  guardar("rasp:extras:" + estado.loja, [...ler("rasp:extras:" + estado.loja, []), novo]);
+  guardarEstado(); $("d-novo").close(); $("pesq").value = String(jogo); desenhar();
+});
+
+// ficheiro enviado: um CSV por contagem, igual à folha do Excel (Jogo, Nome, Soltos, Blocos, Total)
+function csv(){
+  const L = ["Loja;Data;Tipo;Jogo;Nome;Preco;Indiv;Blocos;PorBloco;Total"];
+  for (const j of listaCompleta()){
+    const l = estado.linhas[j.jogo] || {}, ind = num(l.ind), blo = num(l.blo), maco = j.por_maco || POR_MACO[j.preco] || 0;
+    if (!ind && !blo) continue;
+    L.push([estado.loja, estado.data, estado.tipo, j.jogo, j.nome.replace(/;/g, ","), j.preco, ind, blo, maco, ind + blo * maco].join(";"));
+  }
+  return "﻿" + L.join("\r\n") + "\r\n";
+}
+$("b-enviar").addEventListener("click", async () => {
+  if (!Object.values(estado.linhas).some(l => num(l.ind) || num(l.blo))) return toast("Ainda não há nada contado.");
+  const nome = `stocks ${LOJAS[estado.loja]} ${estado.tipo} ${estado.data.split("-").reverse().join("-")}.csv`;
+  const ficheiro = new File([csv()], nome, {type: "text/csv"});
+  try {
+    if (navigator.canShare && navigator.canShare({files:[ficheiro]})){
+      await navigator.share({files:[ficheiro], title: nome});
+      return toast("Enviado.");
+    }
+  } catch(e){ if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(ficheiro); a.download = nome; a.click();
+  toast("Ficheiro guardado: " + nome);
+});
+
+(async function(){
+  await carregarJogos();
+  const u = ler("rasp:ultimo", {loja:3, tipo:"inicial"});
+  abrir(u.loja || 3, hoje(), u.tipo || "inicial");
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>

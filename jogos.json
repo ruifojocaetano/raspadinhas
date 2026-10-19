@@ -1,0 +1,221 @@
+{
+ "gerado": "2026-10-19 14:34",
+ "jogos": [
+  {
+   "jogo": 659,
+   "nome": "10X",
+   "preco": 1,
+   "por_maco": 100
+  },
+  {
+   "jogo": 672,
+   "nome": "Ano do Cavalo",
+   "preco": 1,
+   "por_maco": 100
+  },
+  {
+   "jogo": 680,
+   "nome": "Trevo Mágico",
+   "preco": 1,
+   "por_maco": 100
+  },
+  {
+   "jogo": 702,
+   "nome": "Hora de Ganhar",
+   "preco": 1,
+   "por_maco": 100
+  },
+  {
+   "jogo": 704,
+   "nome": "Árvore do Dinheiro",
+   "preco": 1,
+   "por_maco": 100
+  },
+  {
+   "jogo": 706,
+   "nome": "Euros à Vista",
+   "preco": 1,
+   "por_maco": 100
+  },
+  {
+   "jogo": 660,
+   "nome": "5 da Sorte",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 665,
+   "nome": "Grande Sorte",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 667,
+   "nome": "20X",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 683,
+   "nome": "Aranha da Sorte",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 686,
+   "nome": "7-11-21",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 696,
+   "nome": "Verão Fantástico",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 698,
+   "nome": "Joker",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 714,
+   "nome": "Dia das Bruxas",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 645,
+   "nome": "Pé-De-Meia",
+   "preco": 3,
+   "por_maco": 35
+  },
+  {
+   "jogo": 678,
+   "nome": "Números da Sorte",
+   "preco": 3,
+   "por_maco": 35
+  },
+  {
+   "jogo": 690,
+   "nome": "Palavras Sortudas Bónus",
+   "preco": 3,
+   "por_maco": 35
+  },
+  {
+   "jogo": 692,
+   "nome": "Recompensa",
+   "preco": 3,
+   "por_maco": 35
+  },
+  {
+   "jogo": 694,
+   "nome": "Puzzle de Prémios",
+   "preco": 3,
+   "por_maco": 35
+  },
+  {
+   "jogo": 718,
+   "nome": "Palavras Sortudas Bonus",
+   "preco": 3,
+   "por_maco": 35
+  },
+  {
+   "jogo": 644,
+   "nome": "Raspadinha 30 Anos",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 657,
+   "nome": "50X",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 661,
+   "nome": "Super Pé-De-Meia",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 669,
+   "nome": "50X",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 674,
+   "nome": "Super Roda de Prémios",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 679,
+   "nome": "Super Recompensa",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 682,
+   "nome": "7 dos Reis",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 691,
+   "nome": "Rápido € 500",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 716,
+   "nome": "Super 7-11-21",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 722,
+   "nome": "Outono Fantástico",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 649,
+   "nome": "Mega Pé-De-Meia",
+   "preco": 10,
+   "por_maco": 20
+  },
+  {
+   "jogo": 671,
+   "nome": "Extra!",
+   "preco": 10,
+   "por_maco": 20
+  },
+  {
+   "jogo": 675,
+   "nome": "Rápido € 1000",
+   "preco": 10,
+   "por_maco": 20
+  },
+  {
+   "jogo": 677,
+   "nome": "100X",
+   "preco": 10,
+   "por_maco": 20
+  },
+  {
+   "jogo": 687,
+   "nome": "Mega Pé-De-Meia",
+   "preco": 10,
+   "por_maco": 20
+  },
+  {
+   "jogo": 673,
+   "nome": "Fortuna",
+   "preco": 15,
+   "por_maco": 20
+  }
+ ]
+}
