@@ -71,6 +71,19 @@ main{padding:6px 16px}
 .btn.principal{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
 .btn.perigo{color:var(--warn)}
 .btn.larga{grid-column:1/-1}
+.nome .sub{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
+.nome .sub .pv{margin-top:0}
+.mb{min-height:44px;border-radius:10px;border:1px dashed var(--brand);background:transparent;color:var(--brand);font:inherit;font-size:.82rem;font-weight:600;padding:0 10px}
+.mb.tem-m{background:var(--brand);color:var(--brand-ink);border-style:solid}
+.macos{grid-column:1/-1;border-top:1px dashed var(--line);margin-top:6px;padding-top:8px}
+.maco{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px}
+.maco .lbl{font-size:.7rem;color:var(--muted);width:100%}
+.linha .maco input{width:76px;min-height:48px}
+.maco .rest{font-weight:700;min-width:84px}
+.maco .erro{color:var(--warn);font-size:.8rem;width:100%}
+.maco .av{color:var(--accent);font-size:.8rem;width:100%}
+.maco .chip,.maco .x{min-height:44px;padding:0 12px}
+.macos .soma{font-size:.85rem;color:var(--muted)}
 dialog{max-height:88vh;overflow:auto}
 .g-item{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:6px 0}
 .g-item b{display:block}
@@ -238,9 +251,62 @@ function abrir(loja, data, tipo){
   desenhar();
 }
 
+// maço aberto: escreve-se o nº onde o maço vai (o próximo a vender) e o último nº; a ordem pode ser crescente ou decrescente
+const p3 = v => String(v == null ? "" : v).replace(/\D/g, "").slice(0, 3);
+const pad3 = n => String(n).padStart(3, "0");
+function restoMaco(m, maco){
+  if (!m || m.a === "" || m.b === "" || m.a == null || m.b == null) return {n:0};
+  const a = +m.a, b = +m.b;
+  if (maco && (a > maco - 1 || b > maco - 1)) return {n:0, erro:`Número fora do maço (000 a ${pad3(maco - 1)}).`};
+  const r = {n: Math.abs(b - a) + 1};
+  if (maco && b !== 0 && b !== maco - 1) r.aviso = `O último de um maço é 000 ou ${pad3(maco - 1)}. Confirma.`;
+  return r;
+}
+const restoMacos = (l, maco) => ((l && l.macos) || []).reduce((s, m) => s + restoMaco(m, maco).n, 0);
+const temContagem = l => !!(l && (num(l.ind) || num(l.blo) || (l.macos || []).some(m => m.a !== "" && m.b !== "")));
+const macoDe = j => j.por_maco || POR_MACO[j.preco] || 0;
+const abertos = new Set();   // linhas com o painel «maço aberto» aberto
 function totalLinha(j){
-  const l = estado.linhas[j.jogo] || {};
-  return num(l.ind) + num(l.blo) * (j.por_maco || POR_MACO[j.preco] || 0);
+  const l = estado.linhas[j.jogo] || {}, maco = macoDe(j);
+  return num(l.ind) + restoMacos(l, maco) + num(l.blo) * maco;
+}
+function htmlMacos(j, l){
+  const maco = macoDe(j), ms = l.macos || [];
+  let h = '<div class="macos">';
+  ms.forEach((m, i) => {
+    const r = restoMaco(m, maco);
+    h += `<div class="maco" data-i="${i}"><span class="lbl">Maço ${i + 1}: número onde vai → último número</span>` +
+      `<input inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="agora" aria-label="Número onde o maço vai" data-m="a" value="${esc(m.a || "")}">` +
+      `<span>→</span>` +
+      `<input inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="último" aria-label="Último número do maço" data-m="b" value="${esc(m.b || "")}">` +
+      (maco ? `<button class="chip" data-a="fim" data-v="0">000</button><button class="chip" data-a="fim" data-v="${maco - 1}">${pad3(maco - 1)}</button>` : "") +
+      `<span class="rest">${r.n ? "= " + r.n + " bilhetes" : ""}</span>` +
+      `<button class="chip x" data-a="rm" aria-label="Remover maço">✕</button>` +
+      `<span class="erro">${esc(r.erro || "")}</span><span class="av">${esc(r.aviso || "")}</span></div>`;
+  });
+  h += `<button class="chip" data-a="add">+ ${ms.length ? "outro maço" : "maço aberto"}</button>`;
+  if (ms.length > 1) h += ` <span class="soma">Maços abertos: ${restoMacos(l, maco)} bilhetes</span>`;
+  return h + "</div>";
+}
+const rotuloMb = (l, maco) => ((l.macos || []).some(m => restoMaco(m, maco).erro) ? "⚠ " : "") + "Maço aberto" + ((l.macos || []).length ? ": " + restoMacos(l, maco) : "");
+function criarLinha(j){
+  const l = estado.linhas[j.jogo] || {}, maco = macoDe(j), tem = temContagem(l);
+  const nm = (l.macos || []).length;
+  const d = document.createElement("div");
+  d.className = "linha" + (tem ? " tem" : ""); d.dataset.jogo = j.jogo;
+  d.innerHTML =
+    `<div class="nome"><b>${j.jogo}</b> <span class="n">${esc(j.nome)}</span><div class="sub"><span class="pv p${j.preco}">${j.preco} €</span>` +
+    `<button class="mb${nm ? " tem-m" : ""}" data-a="tog">${rotuloMb(l, maco)}</button></div></div>` +
+    `<input inputmode="numeric" pattern="[0-9]*" aria-label="Soltos ${j.jogo}" data-c="ind" value="${num(l.ind)||""}">` +
+    `<input inputmode="numeric" pattern="[0-9]*" aria-label="Blocos ${j.jogo}" data-c="blo" value="${num(l.blo)||""}">` +
+    `<div class="tot">${totalLinha(j)||""}<small>${maco ? "×"+maco : ""}</small></div>` +
+    (abertos.has(j.jogo) ? htmlMacos(j, l) : "");
+  return d;
+}
+function redesenharLinha(jogo){
+  const j = listaCompleta().find(x => x.jogo === jogo), old = $("lista").querySelector(`.linha[data-jogo="${jogo}"]`);
+  if (j && old) old.replaceWith(criarLinha(j));
+  guardarEstado(); totais();
 }
 
 function desenhar(){
@@ -250,19 +316,10 @@ function desenhar(){
   let n = 0;
   for (const j of listaCompleta()){
     const l = estado.linhas[j.jogo] || {};
-    const tem = num(l.ind) || num(l.blo);
-    if (soTem && !tem) continue;
+    if (soTem && !temContagem(l)) continue;
     if (q && !(String(j.jogo).includes(q) || j.nome.toLowerCase().includes(q))) continue;
     n++;
-    const maco = j.por_maco || POR_MACO[j.preco] || 0;
-    const d = document.createElement("div");
-    d.className = "linha" + (tem ? " tem" : ""); d.dataset.jogo = j.jogo;
-    d.innerHTML =
-      `<div class="nome"><b>${j.jogo}</b> <span class="n">${esc(j.nome)}</span><span class="pv p${j.preco}">${j.preco} €</span></div>` +
-      `<input inputmode="numeric" pattern="[0-9]*" aria-label="Soltos ${j.jogo}" data-c="ind" value="${num(l.ind)||""}">` +
-      `<input inputmode="numeric" pattern="[0-9]*" aria-label="Blocos ${j.jogo}" data-c="blo" value="${num(l.blo)||""}">` +
-      `<div class="tot">${totalLinha(j)||""}<small>${maco ? "×"+maco : ""}</small></div>`;
-    box.appendChild(d);
+    box.appendChild(criarLinha(j));
   }
   if (!n) box.innerHTML = '<div class="vazio">Nenhum jogo para mostrar.</div>';
   totais();
@@ -288,23 +345,60 @@ $("lista").addEventListener("input", e => {
   const inp = e.target.closest("input"); if (!inp) return;
   const linha = inp.closest(".linha"), jogo = +linha.dataset.jogo;
   const l = estado.linhas[jogo] = estado.linhas[jogo] || {};
+  estado.enviado = false;
+  if (inp.dataset.m){            // número de um maço aberto
+    const mc = inp.closest(".maco"), m = (l.macos || [])[+mc.dataset.i]; if (!m) return;
+    m[inp.dataset.m] = p3(inp.value);
+    if (inp.value !== m[inp.dataset.m]) inp.value = m[inp.dataset.m];
+    return atualizarMaco(linha, jogo, mc, m);
+  }
   l[inp.dataset.c] = inp.value.replace(/\D/g, "");
   if (inp.value !== l[inp.dataset.c]) inp.value = l[inp.dataset.c];
-  estado.enviado = false;
   atualizarLinha(linha, jogo);
 });
 function atualizarLinha(linha, jogo){
-  const j = listaCompleta().find(x => x.jogo === jogo);
-  const t = totalLinha(j), maco = j.por_maco || POR_MACO[j.preco] || 0;
+  const j = listaCompleta().find(x => x.jogo === jogo), l = estado.linhas[jogo] || {};
+  const t = totalLinha(j), maco = macoDe(j), nm = (l.macos || []).length;
   linha.querySelector(".tot").innerHTML = `${t||""}<small>${maco ? "×"+maco : ""}</small>`;
-  linha.classList.toggle("tem", !!t);
+  linha.classList.toggle("tem", temContagem(l));
+  const mb = linha.querySelector(".mb"); mb.classList.toggle("tem-m", !!nm); mb.textContent = rotuloMb(l, maco);
   guardarEstado(); totais();
 }
+// escrever num maço aberto: atualiza só o resultado desse maço (sem recriar, para o teclado não fechar)
+function atualizarMaco(linha, jogo, mc, m){
+  const j = listaCompleta().find(x => x.jogo === jogo), l = estado.linhas[jogo], maco = macoDe(j), r = restoMaco(m, maco);
+  mc.querySelector(".rest").textContent = r.n ? "= " + r.n + " bilhetes" : "";
+  mc.querySelector(".erro").textContent = r.erro || ""; mc.querySelector(".av").textContent = r.aviso || "";
+  const s = linha.querySelector(".soma"); if (s) s.textContent = "Maços abertos: " + restoMacos(l, maco) + " bilhetes";
+  atualizarLinha(linha, jogo);
+}
+// botões da linha: abrir/fechar o painel do maço, acrescentar/remover maço, atalhos 000 / último
+$("lista").addEventListener("click", e => {
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const linha = b.closest(".linha"), jogo = +linha.dataset.jogo, l = estado.linhas[jogo] = estado.linhas[jogo] || {};
+  const mc = b.closest(".maco"), i = mc ? +mc.dataset.i : -1, a = b.dataset.a;
+  estado.enviado = false;
+  if (a === "tog"){
+    if (abertos.has(jogo)) abertos.delete(jogo); else { abertos.add(jogo); if (!(l.macos || []).length) l.macos = [{a:"", b:""}]; }
+    redesenharLinha(jogo);
+    const f = $("lista").querySelector(`.linha[data-jogo="${jogo}"] .maco input`); if (f) f.focus();
+  } else if (a === "add"){
+    (l.macos = l.macos || []).push({a:"", b:""}); redesenharLinha(jogo);
+    const todos = $("lista").querySelectorAll(`.linha[data-jogo="${jogo}"] .maco`); const u = todos[todos.length - 1]; if (u) u.querySelector("input").focus();
+  } else if (a === "rm"){
+    const m = l.macos[i]; if (m && (m.a || m.b) && !confirm("Remover este maço?")) return;
+    l.macos.splice(i, 1); if (!l.macos.length) { delete l.macos; abertos.delete(jogo); }
+    redesenharLinha(jogo);
+  } else if (a === "fim"){
+    const m = l.macos[i]; m.b = pad3(+b.dataset.v);
+    mc.querySelector('input[data-m="b"]').value = m.b; atualizarMaco(linha, jogo, mc, m);
+  }
+});
 $("lista").addEventListener("focusin", e => { if (e.target.matches("input")) { e.target.dataset.prev = e.target.value; setTimeout(() => e.target.select(), 0); } });
 
 // valor invulgar: ao sair do campo, pede confirmação (apanha gralhas de teclado); se disser que não, volta ao valor anterior
 $("lista").addEventListener("change", e => {
-  const inp = e.target.closest("input"); if (!inp) return;
+  const inp = e.target.closest("input"); if (!inp || !inp.dataset.c) return;
   const linha = inp.closest(".linha"), jogo = +linha.dataset.jogo, c = inp.dataset.c, v = num(inp.value);
   const j = listaCompleta().find(x => x.jogo === jogo); if (!j || !v) return;
   const maco = j.por_maco || POR_MACO[j.preco] || 0, msgs = [];
@@ -312,7 +406,7 @@ $("lista").addEventListener("change", e => {
   if (c === "blo" && v > 30) msgs.push(`${v} blocos é muito.`);
   if (estado.tipo === "final"){
     const ini = ler(chave(estado.loja, estado.data, "inicial"), null), li = ini && ini.linhas[jogo];
-    if (li){ const ti = num(li.ind) + num(li.blo) * maco, tf = totalLinha(j);
+    if (li){ const ti = num(li.ind) + restoMacos(li, maco) + num(li.blo) * maco, tf = totalLinha(j);
       if (tf > ti + 2 * maco) msgs.push(`O final (${tf}) é maior que o inicial (${ti}).`); }
   }
   if (!msgs.length || confirm(`${j.jogo} ${j.nome}\n${msgs.join("\n")}\nEstá certo?`)) return;
@@ -368,11 +462,13 @@ $("n-ok").addEventListener("click", () => {
 
 // ficheiro enviado: um CSV por contagem, igual à folha do Excel (Jogo, Nome, Soltos, Blocos, Total)
 function csv(){
-  const L = ["Loja;Data;Tipo;Jogo;Nome;Preco;Indiv;Blocos;PorBloco;Total;Funcionaria"];
+  const L = ["Loja;Data;Tipo;Jogo;Nome;Preco;Indiv;Blocos;PorBloco;Total;Funcionaria;MacosAbertos"];
   for (const j of listaCompleta()){
-    const l = estado.linhas[j.jogo] || {}, ind = num(l.ind), blo = num(l.blo), maco = j.por_maco || POR_MACO[j.preco] || 0;
+    const l = estado.linhas[j.jogo] || {}, maco = macoDe(j), blo = num(l.blo), ind = num(l.ind) + restoMacos(l, maco);
     if (!ind && !blo) continue;
-    L.push([estado.loja, estado.data, estado.tipo, j.jogo, j.nome.replace(/;/g, ","), j.preco, ind, blo, maco, ind + blo * maco, estado.func || ""].join(";"));
+    // Indiv = soltos + o que resta nos maços abertos; MacosAbertos mostra os números escritos (agora>último=restam)
+    const mac = (l.macos || []).filter(m => restoMaco(m, maco).n).map(m => `${m.a}>${m.b}=${restoMaco(m, maco).n}`).join("|");
+    L.push([estado.loja, estado.data, estado.tipo, j.jogo, j.nome.replace(/;/g, ","), j.preco, ind, blo, maco, ind + blo * maco, estado.func || "", mac].join(";"));
   }
   return "﻿" + L.join("\r\n") + "\r\n";
 }
@@ -387,7 +483,9 @@ function csvTotais(){
 }
 $("b-enviar").addEventListener("click", () => enviar());
 async function enviar(){
-  if (!Object.values(estado.linhas).some(l => num(l.ind) || num(l.blo))) return toast("Ainda não há nada contado.");
+  if (!Object.values(estado.linhas).some(temContagem)) return toast("Ainda não há nada contado.");
+  const erros = listaCompleta().filter(j => ((estado.linhas[j.jogo] || {}).macos || []).some(m => restoMaco(m, macoDe(j)).erro));
+  if (erros.length) return toast("Corrige o maço aberto fora do intervalo: " + erros.map(j => j.jogo).join(", ") + ".");
   if (!estado.func) return toast("Escolhe primeiro a funcionária.");
   const sufixo = `${LOJAS[estado.loja]} ${estado.tipo} ${estado.data.split("-").reverse().join("-")}.csv`;
   const ficheiros = [
@@ -420,7 +518,7 @@ function resumoDe(e){
   let bil = 0, jg = 0;
   for (const [jogo, l] of Object.entries(e.linhas || {})){
     const j = [...jogos, ...(e.extras || [])].find(x => x.jogo === +jogo), maco = j ? (j.por_maco || POR_MACO[j.preco] || 0) : 0;
-    const t = num(l.ind) + num(l.blo) * maco; if (t){ bil += t; jg++; }
+    const t = num(l.ind) + restoMacos(l, maco) + num(l.blo) * maco; if (t){ bil += t; jg++; }
   }
   return {bil, jg};
 }
@@ -482,7 +580,7 @@ $("g-ficheiro").addEventListener("change", async e => {
   // retoma: se a última contagem aberta era de outro dia e ficou por enviar, volta a ela
   if (u.data && u.data !== data){
     const e = ler(chave(u.loja, u.data, u.tipo), null);
-    if (e && !e.enviado && Object.values(e.linhas || {}).some(l => num(l.ind) || num(l.blo))){ data = u.data; retomada = true; }
+    if (e && !e.enviado && Object.values(e.linhas || {}).some(temContagem)){ data = u.data; retomada = true; }
   }
   abrir(u.loja || 3, data, u.tipo || "inicial");
   if (retomada) toast("Retomada a contagem de " + dmy(data) + " (ainda não enviada).");
