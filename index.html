@@ -7,6 +7,9 @@
 <meta name="theme-color" content="#1f5f4a">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Raspadinhas">
 <style>
 :root{
   --bg:#f4f1ea; --card:#ffffff; --ink:#1d2421; --muted:#68726d; --line:#dcd6c8;
@@ -26,15 +29,15 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple
   padding-bottom:calc(84px + env(safe-area-inset-bottom));}
 header{position:sticky;top:0;z-index:5;background:var(--brand);color:var(--brand-ink);padding:10px 16px 12px;
   padding-top:calc(10px + env(safe-area-inset-top))}
-header h1{font-size:1.05rem;margin:0 0 8px;font-weight:650}
+header h1{font-size:1.05rem;margin:0 0 8px;font-weight:650;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#tipo-lbl{min-height:32px;border-radius:16px;border:2px solid rgba(255,255,255,.7);background:transparent;color:var(--brand-ink);
+  font:inherit;font-size:.9rem;font-weight:600;padding:0 12px}
 .controlos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .controlos select,.controlos input{width:100%;min-height:44px;border-radius:10px;border:0;padding:0 10px;font:inherit;
   background:rgba(255,255,255,.95);color:#1d2421}
-.controlos #func{grid-column:1/-1}
-.tipo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.tipo button{min-height:44px;border-radius:10px;border:2px solid rgba(255,255,255,.55);background:transparent;
-  color:var(--brand-ink);font:inherit;font-weight:600}
-.tipo button[aria-pressed="true"]{background:#fff;color:#1f5f4a;border-color:#fff}
+#ecra{min-height:44px;border-radius:10px;border:2px solid rgba(255,255,255,.55);background:transparent;
+  color:var(--brand-ink);font:inherit;font-weight:600;padding:0 8px}
+#ecra[aria-pressed="true"]{background:#fff;color:#1f5f4a;border-color:#fff}
 .barra{display:flex;gap:8px;padding:10px 16px 4px;align-items:center}
 .barra input[type=search]{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line);padding:0 12px;font:inherit;
   background:var(--card);color:var(--ink)}
@@ -107,7 +110,7 @@ dialog .fim{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 </head>
 <body>
 <header>
-  <h1>Contagem de raspadinhas</h1>
+  <h1><span>Contagem de raspadinhas</span><button id="tipo-lbl" aria-label="Tipo de contagem (tocar para trocar)"></button></h1>
   <div class="controlos">
     <select id="loja" aria-label="Loja">
       <option value="1">Loja 1 · Raimundo</option>
@@ -117,10 +120,7 @@ dialog .fim{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
     </select>
     <input id="data" type="date" aria-label="Data da contagem">
     <select id="func" aria-label="Funcionária"></select>
-  </div>
-  <div class="tipo" role="group" aria-label="Tipo de contagem">
-    <button id="t-inicial" aria-pressed="true">Inicial (manhã)</button>
-    <button id="t-final" aria-pressed="false">Final (noite)</button>
+    <button id="ecra" aria-pressed="false">Ecrã sempre ligado</button>
   </div>
 </header>
 
@@ -246,8 +246,7 @@ function abrir(loja, data, tipo){
   if (!estado.func) estado.func = ler("rasp:func", "");
   desenharFunc(estado.func);
   $("loja").value = loja; $("data").value = data;
-  $("t-inicial").setAttribute("aria-pressed", tipo === "inicial");
-  $("t-final").setAttribute("aria-pressed", tipo === "final");
+  $("tipo-lbl").textContent = tipo === "final" ? "Final" : "Inicial";
   desenhar();
 }
 
@@ -415,15 +414,22 @@ $("lista").addEventListener("change", e => {
   atualizarLinha(linha, jogo);
 });
 
-function mudar(){
-  const loja = +$("loja").value, data = $("data").value || hoje();
-  const tipo = $("t-final").getAttribute("aria-pressed") === "true" ? "final" : "inicial";
-  abrir(loja, data, tipo);
+// o tipo escolhe-se sozinho: já há final → final; inicial enviado → final; inicial por enviar → inicial;
+// sem nada guardado, a partir das 15h é final. O botão «Inicial/Final» no topo troca à mão.
+function tipoAuto(loja, data){
+  const f = ler(chave(loja, data, "final"), null), i = ler(chave(loja, data, "inicial"), null);
+  const tem = e => e && Object.values(e.linhas || {}).some(temContagem);
+  if (tem(f)) return "final";
+  if (tem(i)) return i.enviado ? "final" : "inicial";
+  return data === hoje() && new Date().getHours() >= 15 ? "final" : "inicial";
 }
-$("loja").addEventListener("change", mudar);
-$("data").addEventListener("change", mudar);
-$("t-inicial").addEventListener("click", () => { $("t-inicial").setAttribute("aria-pressed", true); $("t-final").setAttribute("aria-pressed", false); mudar(); });
-$("t-final").addEventListener("click", () => { $("t-final").setAttribute("aria-pressed", false); $("t-final").setAttribute("aria-pressed", true); $("t-inicial").setAttribute("aria-pressed", false); mudar(); });
+function mudar(tipo){
+  const loja = +$("loja").value, data = $("data").value || hoje();
+  abrir(loja, data, tipo || tipoAuto(loja, data));
+}
+$("loja").addEventListener("change", () => mudar());
+$("data").addEventListener("change", () => mudar());
+$("tipo-lbl").addEventListener("click", () => mudar(estado.tipo === "final" ? "inicial" : "final"));
 $("pesq").addEventListener("input", desenhar);
 $("so-tem").addEventListener("click", e => { const b = e.currentTarget; b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); desenhar(); });
 
@@ -481,13 +487,30 @@ function csvTotais(){
   L.push([...base, "TOTAL", bil, eur].join(";"));
   return "\ufeff" + L.join("\r\n") + "\r\n";
 }
+// manter o ecrã ligado durante a contagem (Wake Lock; volta a pedir ao regressar à app)
+let ecraLock = null, ecraQuer = false;
+async function pedirEcra(){
+  try { ecraLock = await navigator.wakeLock.request("screen"); ecraLock.addEventListener("release", () => { ecraLock = null; }); }
+  catch(e){ ecraQuer = false; $("ecra").setAttribute("aria-pressed", "false"); toast("Não foi possível manter o ecrã ligado."); }
+}
+{
+  $("ecra").addEventListener("click", async () => {
+    if (!("wakeLock" in navigator)) return toast("Este telemóvel ou endereço não permite. Funciona na versão publicada (https).");
+    ecraQuer = !ecraQuer;
+    $("ecra").setAttribute("aria-pressed", String(ecraQuer));
+    if (ecraQuer){ await pedirEcra(); if (ecraQuer) toast("O ecrã fica ligado enquanto a app estiver aberta."); }
+    else if (ecraLock){ ecraLock.release(); ecraLock = null; }
+  });
+  document.addEventListener("visibilitychange", () => { if (ecraQuer && !ecraLock && document.visibilityState === "visible") pedirEcra(); });
+}
 $("b-enviar").addEventListener("click", () => enviar());
 async function enviar(){
   if (!Object.values(estado.linhas).some(temContagem)) return toast("Ainda não há nada contado.");
   const erros = listaCompleta().filter(j => ((estado.linhas[j.jogo] || {}).macos || []).some(m => restoMaco(m, macoDe(j)).erro));
   if (erros.length) return toast("Corrige o maço aberto fora do intervalo: " + erros.map(j => j.jogo).join(", ") + ".");
   if (!estado.func) return toast("Escolhe primeiro a funcionária.");
-  const sufixo = `${LOJAS[estado.loja]} ${estado.tipo} ${estado.data.split("-").reverse().join("-")}.csv`;
+  const agora = new Date(), hora = String(agora.getHours()).padStart(2, "0") + "h" + String(agora.getMinutes()).padStart(2, "0");
+  const sufixo = `${LOJAS[estado.loja]} ${estado.tipo} ${estado.data.split("-").reverse().join("-")} ${hora}.csv`;
   const ficheiros = [
     new File([csv()], "stocks " + sufixo, {type: "text/csv"}),
     new File([csvTotais()], "totais " + sufixo, {type: "text/csv"})
@@ -582,7 +605,7 @@ $("g-ficheiro").addEventListener("change", async e => {
     const e = ler(chave(u.loja, u.data, u.tipo), null);
     if (e && !e.enviado && Object.values(e.linhas || {}).some(temContagem)){ data = u.data; retomada = true; }
   }
-  abrir(u.loja || 3, data, u.tipo || "inicial");
+  abrir(u.loja || 3, data, retomada ? u.tipo : tipoAuto(u.loja || 3, data));
   if (retomada) toast("Retomada a contagem de " + dmy(data) + " (ainda não enviada).");
   const b = ler("rasp:backup", 0);
   if (contagensGuardadas().length && (!b || Date.now() - b > 7 * 864e5)) $("aviso-lista").textContent += " · Falta cópia de segurança (botão no fim da página).";

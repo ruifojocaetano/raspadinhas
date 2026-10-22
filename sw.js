@@ -1,6 +1,6 @@
 // Funciona sem rede: guarda a app e a lista de jogos. Mudar VERSAO quando se publica uma versão nova.
-const VERSAO = "rasp-v5";
-const FICHEIROS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./jogos.json"];
+const VERSAO = "rasp-v6";
+const FICHEIROS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./apple-touch-icon.png", "./icon-512.png", "./icon-maskable-512.png", "./jogos.json"];
 self.addEventListener("install", e => e.waitUntil(caches.open(VERSAO).then(c => c.addAll(FICHEIROS)).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(
   caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSAO).map(k => caches.delete(k)))).then(() => self.clients.claim())));
