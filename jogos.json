@@ -1,5 +1,5 @@
 {
- "gerado": "2026-10-27 06:05",
+ "gerado": "2026-10-28 06:11",
  "jogos": [
   {
    "jogo": 659,
@@ -64,6 +64,12 @@
   {
    "jogo": 667,
    "nome": "20X",
+   "preco": 2,
+   "por_maco": 50
+  },
+  {
+   "jogo": 681,
+   "nome": "Grande Sorte com Bónus",
    "preco": 2,
    "por_maco": 50
   },
