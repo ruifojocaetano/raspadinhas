@@ -1,5 +1,5 @@
 {
- "gerado": "2026-11-02 13:46",
+ "gerado": "2026-11-03 12:57",
  "jogos": [
   {
    "jogo": 659,
@@ -190,6 +190,12 @@
   {
    "jogo": 691,
    "nome": "Rápido € 500",
+   "preco": 5,
+   "por_maco": 35
+  },
+  {
+   "jogo": 697,
+   "nome": "Boas Festas",
    "preco": 5,
    "por_maco": 35
   },
