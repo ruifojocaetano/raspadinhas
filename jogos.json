@@ -1,15 +1,9 @@
 {
- "gerado": "2026-11-05 13:27",
+ "gerado": "2026-11-06 13:10",
  "jogos": [
   {
    "jogo": 659,
    "nome": "10X",
-   "preco": 1,
-   "por_maco": 100
-  },
-  {
-   "jogo": 672,
-   "nome": "Ano do Cavalo",
    "preco": 1,
    "por_maco": 100
   },
@@ -122,12 +116,6 @@
    "por_maco": 35
   },
   {
-   "jogo": 690,
-   "nome": "Palavras Sortudas Bónus",
-   "preco": 3,
-   "por_maco": 35
-  },
-  {
    "jogo": 692,
    "nome": "Recompensa",
    "preco": 3,
@@ -148,12 +136,6 @@
   {
    "jogo": 644,
    "nome": "Raspadinha 30 Anos",
-   "preco": 5,
-   "por_maco": 35
-  },
-  {
-   "jogo": 657,
-   "nome": "50X",
    "preco": 5,
    "por_maco": 35
   },
