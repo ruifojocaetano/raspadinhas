@@ -1,5 +1,5 @@
 {
- "gerado": "2026-11-15 12:55",
+ "gerado": "2026-11-16 13:56",
  "jogos": [
   {
    "jogo": 659,
@@ -220,6 +220,12 @@
   {
    "jogo": 687,
    "nome": "Mega Pé-De-Meia",
+   "preco": 10,
+   "por_maco": 20
+  },
+  {
+   "jogo": 693,
+   "nome": "Feliz Natal",
    "preco": 10,
    "por_maco": 20
   },
