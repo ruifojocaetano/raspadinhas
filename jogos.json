@@ -1,5 +1,5 @@
 {
- "gerado": "2026-11-16 13:56",
+ "gerado": "2026-11-17 14:48",
  "jogos": [
   {
    "jogo": 659,
@@ -124,6 +124,12 @@
   {
    "jogo": 694,
    "nome": "Puzzle de Prémios",
+   "preco": 3,
+   "por_maco": 35
+  },
+  {
+   "jogo": 701,
+   "nome": "Natal Mágico",
    "preco": 3,
    "por_maco": 35
   },
